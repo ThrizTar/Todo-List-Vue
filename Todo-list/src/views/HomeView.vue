@@ -3,6 +3,8 @@ import { onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useTodoStore } from '../stores/todo'
 
+import Loading from '../components/Loading.vue'
+
 const todoStore = useTodoStore()
 const todoText = ref('')
 const isLoading = ref(false)
@@ -49,6 +51,7 @@ const deleteTodo = async(todoId) => {
 }
 
 const changeStatus = async (event, todoId) => {
+    isLoading.value = true
     try {
         if (event.target.checked){
             await todoStore.editTodo({ status: 'Done' }, todoId)
@@ -59,6 +62,7 @@ const changeStatus = async (event, todoId) => {
     } catch (error) {
         console.log('error', error);
     }
+    isLoading.value = false
     
 }
 </script>
@@ -70,9 +74,7 @@ const changeStatus = async (event, todoId) => {
             <button class="btn btn-primary ml-2" @click="addTodo(todoText)">Add</button>
         </div>
     </div>
-    <div v-if="isLoading">
-        <h2>Loading....</h2>
-    </div>
+    <Loading v-if="isLoading" ></Loading>
         <div class="flex items-center justify-between mt-2" v-for="todo in todoStore.list">
             <div>
                 <input type="checkbox" :checked="todo.status === 'Done'" class="checkbox" @change="changeStatus($event, todo.id)" />
