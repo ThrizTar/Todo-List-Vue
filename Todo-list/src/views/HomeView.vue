@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useTodoStore } from '../stores/todo'
 
@@ -8,6 +8,11 @@ import Loading from '../components/Loading.vue'
 const todoStore = useTodoStore()
 const todoText = ref('')
 const isLoading = ref(false)
+const selectedStatus = ref('Pending')
+
+const filterTodoList = computed(() => { 
+    return todoStore.list.filter(todo => todo.status === selectedStatus.value)
+})
 
 onMounted(async () => {
     isLoading.value = true
@@ -63,7 +68,10 @@ const changeStatus = async (event, todoId) => {
         console.log('error', error);
     }
     isLoading.value = false
-    
+}
+
+const changeSelectedStatus = async(newStatus) => {
+    selectedStatus.value = newStatus
 }
 </script>
 
@@ -75,7 +83,15 @@ const changeStatus = async (event, todoId) => {
         </div>
     </div>
     <Loading v-if="isLoading" ></Loading>
-        <div class="flex items-center justify-between mt-2" v-for="todo in todoStore.list">
+    <div role="tablist" class="tabs tabs-boxed mt-4">
+        <a 
+        v-for="status in todoStore.statuses" 
+        :class="status === selectedStatus ? 'tab tab-active' : 'tab' "
+        @click = changeSelectedStatus(status)>
+            {{ status }}
+        </a>
+    </div>
+        <div class="flex items-center justify-between mt-2" v-for="todo in filterTodoList" :key="todo.id">
             <div>
                 <input type="checkbox" :checked="todo.status === 'Done'" class="checkbox" @change="changeStatus($event, todo.id)" />
             </div>
