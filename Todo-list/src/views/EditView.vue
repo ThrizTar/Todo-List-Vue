@@ -10,6 +10,7 @@ const route = useRoute()
 
 const todoId = ref(-1)
 const isLoaded = ref(false)
+const isUpdated = ref(false)
 
 onMounted( async() => {
     await todoStore.loadTodo(route.params.id)
@@ -19,13 +20,18 @@ onMounted( async() => {
 })
 
 const editTodo = async(selectedTodo) => {
+    isLoaded.value = false
     const bodyData = {
         name: selectedTodo.name,
         status: selectedTodo.status
     }
     try {
         await todoStore.editTodo(bodyData, todoId.value)
-        alert("Edit Complete!!")
+        isUpdated.value = true
+        isLoaded.value = true
+        setTimeout(() => {
+            isUpdated.value = false
+        }, 3000)
     } catch (error) {
         console.log('error', error);        
     }
@@ -34,6 +40,11 @@ const editTodo = async(selectedTodo) => {
 
 <template>
     <div class="w-1/2 mx-auto">
+        <div class="toast toast-top toast-start">
+            <div v-if="isUpdated" class="alert alert-success">
+                <span>Update Successsfully.</span>
+            </div>
+        </div>
         <div class="flex items-center">
             <RouterLink :to="{ name: 'todo-list' }">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="15">
